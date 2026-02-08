@@ -1,75 +1,137 @@
-//Alrighty then, since u came here to check my code, I'll explain u the mental model of my code.
+import { getAllEpisodes } from "./episodes.js";
+document.addEventListener("DOMContentLoaded", () => {
+  // Setup function
+  function setup() {
+    const allEpisodes = getAllEpisodes(); // Get all episodes
+    makePageForEpisodes(allEpisodes); // Build page when loaded
 
-//Step 1.I am wondering- when should this code run?-When the page loads. So I write my first line of code "window.onload = setup;"
+    // Populate the season filter dropdown dynamically
+    populateSeasonFilter(allEpisodes);
+  }
 
-//Then stub the function 
-function setup() {
-  const allEpisodes = getAllEpisodes();// Step 2. Where the data comes from? From the episode.js.
-  makePageForEpisodes(allEpisodes);//Step 3. The function for building UI. At this point is emty.
-}
+  // Populate the season filter dropdown with season options
+  function populateSeasonFilter(episodes) {
+    const seasonFilter = document.getElementById("season-filter");
 
-function makePageForEpisodes(episodeList) {
-  const rootElem = document.getElementById("root");//Step 4. Where on the page should everything go? in the #root(index.html)
-  rootElem.innerHTML = "";
+    // Create a set of unique seasons
+    const seasons = new Set(episodes.map((ep) => ep.season));
+    seasons.forEach((season) => {
+      const option = document.createElement("option");
+      option.value = season;
+      option.textContent = `Season ${season}`;
+      seasonFilter.appendChild(option);
+    });
+  }
 
-  const title = document.createElement("h1");//creating title
-  title.className = "page-title";//css
-  title.textContent = "Game of thrones.Episodes";
+  // Page rendering function
+  function makePageForEpisodes(episodeList) {
+    const rootElem = document.getElementById("root");
+    rootElem.innerHTML = ""; // Clear existing content
 
-  const container = document.createElement("section");//Step 5.Do I append each episode directly to root?No, I need to create a container
-  container.className = "episodes";
+    // Create page title
+    const title = document.createElement("h1");
+    title.className = "page-title";
+    title.textContent = "Game of Thrones Episodes";
 
-  const episodeCards = episodeList.map(createEpisodeCard);//Step 8. I have many episodes. How do I turn them into many cards?by mapping
-  episodeCards.forEach(card => container.append(card));//Step 9. side effect, rendering
+    // Create container for episode cards
+    const container = document.createElement("section");
+    container.className = "episodes";
 
-  rootElem.append(title, container, createFooter());//Step 10.Appending once.
-}
+    // Create episode cards for each episode
+    episodeList.forEach((ep) => {
+      const card = createEpisodeCard(ep); // Create individual episode cards
+      container.append(card); // Append the card to container
+    });
 
+    // Append the title, container, and footer to root
+    rootElem.append(title, container, createFooter());
+  }
 
-//Step 6.One item → one element,creating a card.
-function createEpisodeCard(episode) {
-  const card = document.createElement("article");//Step 7. starting with a shall. Returning card.
-  card.className = "episode-card";
+  // Create a single episode card
+  function createEpisodeCard(episode) {
+    const card = document.createElement("article");
+    card.className = "episode-card";
 
-  const title = document.createElement("h2");
-  title.textContent = `${createEpisodeCode(episode)} — ${episode.name}`;
+    // Episode title
+    const title = document.createElement("h2");
+    title.textContent = `${createEpisodeCode(episode)} — ${episode.name}`;
 
-  const image = document.createElement("img");
-  image.src = episode.image?.medium;
-  image.alt = episode.name;
+    // Episode image
+    const image = document.createElement("img");
+    image.src = episode.image?.medium || "default-image-url.jpg"; // Default image URL if not available
+    image.alt = episode.name;
 
-  const summary = document.createElement("div");
-  summary.className = "summary";
-  summary.innerHTML = episode.summary || "<p>No summary available.</p>";
+    // Episode summary
+    const summary = document.createElement("div");
+    summary.className = "summary";
+    summary.innerHTML = episode.summary || "<p>No summary available.</p>"; // Default if no summary
 
-  const link = document.createElement("a");
-  link.href = episode.url;
-  link.target = "_blank";
-  link.rel = "noopener noreferrer";
-  link.textContent = "View on TVMaze";
+    // Link to episode
+    const link = document.createElement("a");
+    link.href = episode.url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = "View on TVMaze";
 
-  card.append(title, image, summary, link);
-  return card;
-}
+    // Append elements to card
+    card.append(title, image, summary, link);
+    return card; // Return the fully created card
+  }
 
-function createEpisodeCode({ season, number }) {
-  const s = String(season).padStart(2, "0");
-  const e = String(number).padStart(2, "0");
-  return `S${s}E${e}`;
-}
+  // Format episode code as SxxExx
+  function createEpisodeCode({ season, number }) {
+    const s = String(season).padStart(2, "0");
+    const e = String(number).padStart(2, "0");
+    return `S${s}E${e}`;
+  }
 
-function createFooter() {
-  const footer = document.createElement("footer");
-  footer.className = "footer";
-  footer.innerHTML = `
-    <p>
-      Data originally from 
-      <a href="https://www.tvmaze.com/" target="_blank" rel="noopener noreferrer">
-        TVMaze.com
-      </a>
-    </p>
-  `;
-  return footer;
-}
+  // Create footer with external link
+  function createFooter() {
+    const footer = document.createElement("footer");
+    footer.className = "footer";
+    footer.innerHTML = `
+      <p>
+        Data originally from 
+        <a href="https://www.tvmaze.com/" target="_blank" rel="noopener noreferrer">
+          TVMaze.com
+        </a>
+      </p>
+    `;
+    return footer;
+  }
 
-window.onload = setup;
+  // Live search and season filter
+  const searchInput = document.getElementById("search-input");
+  const seasonFilter = document.getElementById("season-filter");
+
+  // Function to update the status message (e.g., "Showing 2 of 79 episodes")
+  function updateStatusMessage(filteredEpisodes, totalEpisodes) {
+    const statusMessage = document.getElementById("status-message");
+    const filteredCount = filteredEpisodes.length;
+    const message = `Showing ${filteredCount} of ${totalEpisodes} episodes`;
+    statusMessage.textContent = message;
+  }
+
+  // Filter episodes based on search input and season filter
+  function filterEpisodes() {
+    const query = searchInput.value.toLowerCase();
+    const season = seasonFilter.value;
+
+    const allEpisodes = getAllEpisodes(); // Get all episodes on filter change
+    const filtered = allEpisodes.filter((ep) => {
+      const matchesText =
+        ep.name.toLowerCase().includes(query) ||
+        ep.summary.toLowerCase().includes(query);
+      const matchesSeason = season === "all" || ep.season === Number(season);
+      return matchesText && matchesSeason;
+    });
+
+    makePageForEpisodes(filtered); // Re-render filtered episodes
+    updateStatusMessage(filtered, allEpisodes.length); // Update status message
+  }
+
+  searchInput.addEventListener("input", filterEpisodes);
+  seasonFilter.addEventListener("change", filterEpisodes);
+
+  setup(); // Initialize when the page loads
+});

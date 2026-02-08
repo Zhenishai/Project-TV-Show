@@ -9,6 +9,29 @@ body {
   color: #e5e7eb;
 }
 
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 1rem 2rem;
+  gap: 1rem;
+}
+
+.controls input,
+.controls select {
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #1e293b;
+  background-color: #020617;
+  color: #e5e7eb;
+}
+
+.controls .status-message {
+  font-size: 1rem;
+  color: #cbd5f5;
+  padding-left: 1rem; /* Space between search bar and status */
+}
+
 .page-title {
   font-size: 1.75rem;
   font-weight: 700;
@@ -34,7 +57,6 @@ body {
   height: 100%;
 }
 
-
 .episode-card h2 {
   font-size: 1rem;
   padding: 1rem;
@@ -57,7 +79,7 @@ body {
 }
 
 .episode-card a {
-  margin-top: auto;   
+  margin-top: auto;
   margin-left: 1rem;
   margin-bottom: 1rem;
   text-decoration: none;
