@@ -1,34 +1,93 @@
-//Alrighty then, since u came here to check my code, I'll explain u the mental model of my code.
+let allEpisodes = [];
+let container;
+let countDisplay;
 
-//Step 1.I am wondering- when should this code run?-When the page loads. So I write my first line of code "window.onload = setup;"
+window.onload = setup;
 
-//Then stub the function 
 function setup() {
-  const allEpisodes = getAllEpisodes();// Step 2. Where the data comes from? From the episode.js.
-  makePageForEpisodes(allEpisodes);//Step 3. The function for building UI. At this point is emty.
+  allEpisodes = getAllEpisodes();
+  buildPageStructure();
+  renderEpisodes(allEpisodes);
 }
 
-function makePageForEpisodes(episodeList) {
-  const rootElem = document.getElementById("root");//Step 4. Where on the page should everything go? in the #root(index.html)
-  rootElem.innerHTML = "";
+function buildPageStructure() {
+  const root = document.getElementById("root");
 
-  const title = document.createElement("h1");//creating title
-  title.className = "page-title";//css
-  title.textContent = "Game of thrones.Episodes";
+  const title = document.createElement("h1");
+  title.className = "page-title";
+  title.textContent = "Game of Thrones Episodes";
 
-  const container = document.createElement("section");//Step 5.Do I append each episode directly to root?No, I need to create a container
+  const controls = createControls();
+
+  container = document.createElement("section");
   container.className = "episodes";
 
-  const episodeCards = episodeList.map(createEpisodeCard);//Step 8. I have many episodes. How do I turn them into many cards?by mapping
-  episodeCards.forEach(card => container.append(card));//Step 9. side effect, rendering
-
-  rootElem.append(title, container, createFooter());//Step 10.Appending once.
+  root.append(title, controls, container, createFooter());
 }
 
+function createControls() {
+  const controls = document.createElement("div");
+  controls.className = "controls";
 
-//Step 6.One item → one element,creating a card.
+  const searchInput = document.createElement("input");
+  searchInput.type = "text";
+  searchInput.placeholder = "Search episodes...";
+
+  countDisplay = document.createElement("p");
+  countDisplay.className = "count";
+
+  const select = document.createElement("select");
+
+  const defaultOption = document.createElement("option");
+  defaultOption.value = "";
+  defaultOption.textContent = "All Episodes";
+  select.append(defaultOption);
+
+  allEpisodes.forEach((ep) => {
+    const option = document.createElement("option");
+    option.value = ep.id;
+    option.textContent = `${createEpisodeCode(ep)} - ${ep.name}`;
+    select.append(option);
+  });
+
+  searchInput.addEventListener("input", () => {
+    const term = searchInput.value.toLowerCase();
+
+    const filtered = allEpisodes.filter(
+      (ep) =>
+        ep.name.toLowerCase().includes(term) ||
+        ep.summary.toLowerCase().includes(term),
+    );
+
+    renderEpisodes(filtered);
+  });
+
+  select.addEventListener("change", () => {
+    if (!select.value) {
+      renderEpisodes(allEpisodes);
+      return;
+    }
+
+    const selected = allEpisodes.filter((ep) => ep.id == select.value);
+
+    renderEpisodes(selected);
+  });
+
+  controls.append(select, searchInput, countDisplay);
+  return controls;
+}
+
+function renderEpisodes(episodeList) {
+  container.innerHTML = "";
+
+  const cards = episodeList.map(createEpisodeCard);
+  cards.forEach((card) => container.append(card));
+
+  countDisplay.textContent = `Displaying ${episodeList.length} / ${allEpisodes.length} episodes`;
+}
+
 function createEpisodeCard(episode) {
-  const card = document.createElement("article");//Step 7. starting with a shall. Returning card.
+  const card = document.createElement("article");
   card.className = "episode-card";
 
   const title = document.createElement("h2");
@@ -42,13 +101,7 @@ function createEpisodeCard(episode) {
   summary.className = "summary";
   summary.innerHTML = episode.summary || "<p>No summary available.</p>";
 
-  const link = document.createElement("a");
-  link.href = episode.url;
-  link.target = "_blank";
-  link.rel = "noopener noreferrer";
-  link.textContent = "View on TVMaze";
-
-  card.append(title, image, summary, link);
+  card.append(title, image, summary);
   return card;
 }
 
@@ -71,5 +124,3 @@ function createFooter() {
   `;
   return footer;
 }
-
-window.onload = setup;
