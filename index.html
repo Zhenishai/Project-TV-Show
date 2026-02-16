@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -9,21 +9,13 @@
   </head>
 
   <body>
-    <div class="controls">
-      <!-- Search input to filter episodes -->
-      <input type="text" id="search-input" placeholder="Search episodes..." />
-      <!-- Dropdown to filter by season -->
-      <select id="season-filter">
-        <option value="all">All Seasons</option>
-        <!-- Options will be populated dynamically -->
-      </select>
-      <!-- Display the filtered count / total count -->
-      <div id="status-message" class="status-message"></div>
+    <div id="root">
     </div>
-    <div id="root"></div>
-    <div id="episodes-container"></div>
 
+    <!-- Loads a provided function called getAllEpisodes() which returns all episodes -->
     <script src="episodes.js"></script>
-    <script type="module" src="script.js"></script>
+
+    <!-- Loads YOUR javascript code -->
+    <script src="script.js"></script>
   </body>
 </html>
